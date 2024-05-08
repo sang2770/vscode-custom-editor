@@ -1,5 +1,4 @@
 # custom-editor-drawer README
-
 This is the README for your extension "custom-editor-drawer". After writing up a brief description, we recommend including the following sections.
 
 ## Features
