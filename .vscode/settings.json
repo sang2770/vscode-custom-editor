@@ -1,0 +1,22 @@
+// Place your settings in this file to overwrite default and user settings.
+{
+	"files.exclude": {
+		"out": false // set this to true to hide the "out" folder with the compiled JS files
+	},
+	"search.exclude": {
+		"out": true // set this to false to include "out" folder in search results
+	},
+	// Turn off tsc task auto detection since we have the necessary tasks as npm scripts
+	"typescript.tsc.autoDetect": "off",
+	"lupastudio.mainBinName": "DQC-SYS_FW",
+	"terminal.integrated.env.windows": {
+		"PATH": "C:\\Users\\sang2.nguyen\\.lupastudio\\venv\\Scripts;${env:PATH}"
+	},
+	"lupastudio.appOffset": "0x201b9000",
+	"lupastudio.lupaExecutable": "${config:lupastudio.sdkroot}/${config:lupastudio.activeSdk}/out/${config:lupastudio.activeTarget}/${config:lupastudio.mainBinName}.elf",
+	"lupastudio.gdbPath": "C:\\Users\\sang2.nguyen\\.lupastudio\\packages\\toolchain-gccarmnoneeabi\\bin\\arm-none-eabi-gdb.exe",
+	"lupastudio.toolchainPath": "C:\\Users\\sang2.nguyen\\.lupastudio\\packages\\toolchain-gccarmnoneeabi",
+	"lupastudio.sdkroot": "C:\\Users\\sang2.nguyen\\.lupastudio\\sdk",
+	"cortex-debug.openocdPath": "C:\\Users\\sang2.nguyen\\.lupastudio\\sdk\\${config:lupastudio.activeSdk}\\sdk\\openocd\\bin\\openocd_mpu.exe",
+	"remote.SSH.defaultForwardedPorts": []
+}
