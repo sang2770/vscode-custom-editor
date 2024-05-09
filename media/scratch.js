@@ -10,7 +10,7 @@
   const addButtonContainer = document.querySelector(".add-button");
   addButtonContainer?.querySelector("button")?.addEventListener("click", () => {
     vscode.postMessage({
-      command: "add",
+      type: "add",
     });
   });
 

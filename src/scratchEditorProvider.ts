@@ -1,5 +1,14 @@
 import * as vscode from "vscode";
 import { getNonce } from "./utils";
+interface ScratchDocument {
+  scratches: ScratchDocumentItem[];
+}
+
+interface ScratchDocumentItem{
+  id: string;
+  text: string;
+  created: number;
+}
 export class ScratchEditorProvider implements vscode.CustomTextEditorProvider {
   public static register(context: vscode.ExtensionContext): vscode.Disposable {
     const provider = new ScratchEditorProvider(context);
@@ -10,6 +19,9 @@ export class ScratchEditorProvider implements vscode.CustomTextEditorProvider {
   }
 
   private static readonly viewType = "scratch-editor-drawer.scratchEditor";
+
+	private static readonly scratchCharacters = ['😸', '😹', '😺', '😻', '😼', '😽', '😾', '🙀', '😿', '🐱'];
+
 
   constructor(private readonly context: vscode.ExtensionContext) {}
 
@@ -74,6 +86,32 @@ export class ScratchEditorProvider implements vscode.CustomTextEditorProvider {
     };
     webviewPanel.webview.html = this.getHtmlForWebview(webviewPanel.webview);
 
+    // Update view when document changes
+    const changeDocumentSubscription = vscode.workspace.onDidChangeTextDocument(e => {
+			if (e.document.uri.toString() === document.uri.toString()) {
+				updateWebview();
+			}
+		});
+
+    webviewPanel.onDidDispose(() => {
+      changeDocumentSubscription.dispose();
+    });
+
+
+    webviewPanel.webview.onDidReceiveMessage((e) => {
+      console.log("Received message from the webview", e);
+      switch (e.type) {
+        case "add":
+          vscode.window.showInformationMessage("Add button clicked");
+          this.addNewScratch(document);
+          break;
+        case "delete":
+          vscode.window.showInformationMessage("Delete button clicked");
+          this.deleteScratch(document, e.id);
+          break;
+      }
+    });
+
     function updateWebview() {
       webviewPanel.webview.postMessage({
         type: "update",
@@ -83,4 +121,51 @@ export class ScratchEditorProvider implements vscode.CustomTextEditorProvider {
 
     updateWebview();
   }
+
+  addNewScratch(document: vscode.TextDocument) {
+    console.log("addNewScratch", document.uri.toString());
+    const dataJson = this.getDocumentAsJson(document);
+    const character = ScratchEditorProvider.scratchCharacters[Math.floor(Math.random() * ScratchEditorProvider.scratchCharacters.length)]; 
+    dataJson.scratches = [
+      ...dataJson.scratches,
+      {
+        id: getNonce(),
+        text: character,
+        created: Date.now(),
+      },
+    ];
+
+    return this.updateTextDocument(document, dataJson);
+  }
+
+  deleteScratch(document: vscode.TextDocument, id: string) {
+    console.log("deleteScratch", document.uri.toString());
+    const dataJson = this.getDocumentAsJson(document);
+    dataJson.scratches = dataJson.scratches.filter((item) => item.id !== id);
+    return this.updateTextDocument(document, dataJson);
+  }
+
+  getDocumentAsJson(document: vscode.TextDocument): ScratchDocument {
+		const text = document.getText();
+		if (text.trim().length === 0) {
+			return {} as ScratchDocument;
+		}
+
+		try {
+			return JSON.parse(text);
+		} catch {
+			throw new Error('Could not get document as json. Content is not valid json');
+		}
+	}
+
+  updateTextDocument(document: vscode.TextDocument, data: ScratchDocument): Thenable<boolean> {
+    const edit = new vscode.WorkspaceEdit();
+    edit.replace(
+      document.uri,
+      new vscode.Range(0, 0, document.lineCount, 0),
+      JSON.stringify(data, null, 2)
+    );
+    return vscode.workspace.applyEdit(edit);
+  }
+
 }
